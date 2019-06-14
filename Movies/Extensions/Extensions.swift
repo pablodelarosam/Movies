@@ -7,3 +7,15 @@
 //
 
 import Foundation
+
+
+extension Int {
+    func unixDate() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        formatter.locale = Locale(identifier: "es_MX")
+        let Unix = formatter.string(from: Date(timeIntervalSince1970: Double(self)))
+        print(Unix)
+        return Unix
+    }
+}

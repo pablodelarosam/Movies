@@ -35,6 +35,9 @@ struct MovieLocation: Codable, Hashable {
         case updated_at = ":updated_at"
         case title = "title"
         case release_year = "release_year"
+        case actor_1 = "actor_1"
+        case actor_2 = "actor_2"
+        case actor_3 = "actor_3"
         case locations = "locations"
     }
     

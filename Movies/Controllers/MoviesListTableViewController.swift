@@ -39,10 +39,6 @@ class MoviesListTableViewController: UITableViewController {
             switch result {
             case .success(let moviesLocationList):
                 print(moviesLocationList)
-             
-//                let moviesLocationListSet = Set(moviesLocationList)
-//                let uniqueScores = Array(scoresSet)
-          
                 self.movies = moviesLocationList
                 
                 for (key, value) in moviesLocationList {
@@ -50,6 +46,12 @@ class MoviesListTableViewController: UITableViewController {
                     self.objectArray.append(MoviesObjects(movieName: key, movieDate: value))
                     
                 }
+                
+                                self.objectArray = self.objectArray.sorted(by: { (a: MoviesObjects, b: MoviesObjects) -> Bool in
+                                    return a.movieName.compare(b.movieName) == .orderedAscending
+                                })
+                
+//                                let sortedTitles = sortedMovies.map({ $0.title })
        
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -66,16 +68,14 @@ class MoviesListTableViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {        
         return objectArray.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as? MoviesTableViewCell else { fatalError() }
         cell.movieName.text = "Movie name: \(objectArray[indexPath.row].movieName)"
-       cell.movieDate.text = "Movie date: \(objectArray[indexPath.row].movieDate[0].created_at)"
+       cell.movieDate.text = "Movie date: \(objectArray[indexPath.row].movieDate[0].created_at.unixDate())"
     
         return cell
     }
@@ -86,14 +86,17 @@ class MoviesListTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.performSegue(withIdentifier: "movieDetail", sender: self)
+        self.performSegue(withIdentifier: "detailSegue", sender: self)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let identifier = segue.identifier {
+           
             switch identifier {
-            case "movieDetail":
-                let
+            case "detailSegue":
+                if let movieDetailVC = segue.destination as? MovieDetailViewController,  let index = tableView.indexPathForSelectedRow, let currentMovie =  movies[                objectArray[index.row].movieName] {
+                    movieDetailVC.movie = currentMovie
+                }
                 break
             default:
                 print("No segue found")
