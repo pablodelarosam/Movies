@@ -12,7 +12,7 @@ import MapKit
 class MovieDetailViewController: UIViewController {
     
     var movie = [MovieLocation]()
-    
+    var addresses = [String]()
     //MARK: Outlets
     @IBOutlet weak var mapView: MKMapView!
 
@@ -30,8 +30,42 @@ class MovieDetailViewController: UIViewController {
         mapView.showsTraffic = true
         for movielocation in movie {
             guard let location = movielocation.locations else { return }
-            setUpAnnotations(location: location, movieName: movielocation.title)
+            addresses.append(location)
+//            setUpAnnotations(location: location, movieName: movielocation.title)
         }
+        geoCode(addresses: addresses, movieName: movie[0].title)
+    }
+    
+    func geoCode(addresses: [String], movieName: String) {
+        print("Addresser: \(addresses.count)")
+        
+        guard let address = addresses.first else {
+            print("No more adresses :) - returning")
+            return
+        }
+        print("3333 address: \(address)")
+     
+        DispatchQueue.main.async {
+            let geocoder = CLGeocoder()
+            geocoder.geocodeAddressString(address) { (placemarks, error) in
+                print("In geocoder!")
+                if error == nil {
+                    if let placemark = (placemarks?[0])! as? CLPlacemark {
+                        // Add annotation
+                        let annotation = MKPointAnnotation()
+                        annotation.title = movieName
+                        annotation.coordinate = CLLocationCoordinate2DMake((placemark.location?.coordinate.latitude)!, (placemark.location?.coordinate.longitude)!)
+                        self.mapView.addAnnotation(annotation)
+                        self.mapView.showAnnotations([annotation], animated: true)
+                        let remainingAddresses = Array(addresses[1..<addresses.count])
+                        print("addresses left: \(remainingAddresses.count)")
+                        self.geoCode(addresses: remainingAddresses, movieName: movieName)
+                    }
+                    geocoder.cancelGeocode()
+                }
+            }
+        }
+        
     }
     
     private func setUpAnnotations(location: String, movieName: String) {
